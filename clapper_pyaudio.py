@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import time
 import pyaudio
 import wave
 import audioop
@@ -68,17 +69,48 @@ def create_pyaudio_interface():
 
 """
 def read_input(p, s):
-    # initializes array for storing the the input
-    frames = []
 
-    # reads the input
-    for i in range(0, int(_FS / _CHUNK * _SECONDS)):
-            data = s.read(_CHUNK)
-            frames.append(data)
-            display_amplitude(data)
+    timer = 0
+    timer_max_threshold = 0.002
+    timer_min_threshold = 0.000
+    clap_amp_threshold = 32600
+    could_be_clap = False
+    really_could_be_clap = False
+    while True:
     
-    # returns frames
-    return frames
+        # TODO:just have it sleep more instead of all of this weird timer stuff
+        # you don't need to be sampling when your waiting
+        # TODO: maybe do something with the average where 
+        # if the average is high then it is probably not a clap
+        # because it is sustained...
+    
+        # Read data from device
+        data = s.read(_CHUNK)
+        if audioop.max(data, 2) > clap_amp_threshold:
+            timer += 0.001
+            # Print the maximum of the absolute value of all samples in a fragment.
+            display_amplitude(data)
+        elif not really_could_be_clap and could_be_clap:
+            really_could_be_clap = True
+                
+        if timer > 0 and not could_be_clap:
+            could_be_clap = True
+    
+        # maybe add sustain flag meaning it wont read claps for a bit of
+        if timer > timer_max_threshold:
+            could_be_clap = False
+            timer = 0
+            print("entered")
+    
+                
+        if timer_max_threshold > timer > timer_min_threshold and really_could_be_clap and could_be_clap:
+            print("clap")
+            could_be_clap = False
+            really_could_be_clap = False
+            timer = 0
+                
+
+        time.sleep(.001)
 
 
 """
