@@ -35,37 +35,48 @@ def clapper():
     timer_min_threshold = 0.000
     could_be_clap = False
     really_could_be_clap = False
+    try:
+        while True:
 
-    while True:
+            # TODO:just have it sleep more instead of all of this weird timer stuff
+            # you don't need to be sampling when your waiting
+            # TODO: maybe do something with the average where 
+            # if the average is high then it is probably not a clap
+            # because it is sustained...
 
-        # Read data from device
-        l,data = inp.read()
-        
-        if l and audioop.max(data, 2) > 32767:
-            timer += 0.001
-            # Print the maximum of the absolute value of all samples in a fragment.
-            print(audioop.max(data, 2))
-        elif l and not really_could_be_clap and could_be_clap:
-            really_could_be_clap = True
-        
-        if timer > 0 and not could_be_clap:
-            could_be_clap = True
+            # Read data from device
+            l,data = inp.read()
+            
+            if l and audioop.max(data, 2) > 32767:
+                timer += 0.001
+                # Print the maximum of the absolute value of all samples in a fragment.
+                print(audioop.max(data, 2))
+            elif l and not really_could_be_clap and could_be_clap:
+                really_could_be_clap = True
+            
+            if l and timer > 0 and not could_be_clap:
+                could_be_clap = True
 
-        # maybe add sustain flag meaning it wont read claps for a bit of
-        if timer > timer_max_threshold:
-            could_be_clap = False
-            timer = 0
-            print("entered")
+            # maybe add sustain flag meaning it wont read claps for a bit of
+            if l and timer > timer_max_threshold:
+                could_be_clap = False
+                timer = 0
+                print("entered")
 
-        
-        if timer_max_threshold > timer > timer_min_threshold and really_could_be_clap and could_be_clap:
-            print("clap")
-            could_be_clap = False
-            really_could_be_clap = False
-            timer = 0
-        
+            
+            if l and timer_max_threshold > timer > timer_min_threshold and really_could_be_clap and could_be_clap:
+                print("clap")
+                could_be_clap = False
+                really_could_be_clap = False
+                timer = 0
+            
 
-        time.sleep(.001)
+            time.sleep(.001)
+    except Exception as err:
+        print(err)
+    finally:
+        print("   Closed PCM")
+        inp.close()
 
 if __name__ == "__main__":
     clapper()
