@@ -2,11 +2,12 @@
 
 import pyaudio
 import wave
+import audioop
 
 
 _CHUNK = 1024
 _SAMPLE_FORMAT = pyaudio.paInt16
-_CHANNELS = 2
+_CHANNELS = 1
 _FS = 44100
 _SECONDS = 3
 _FILENAME = "output.wav"
@@ -20,6 +21,7 @@ def clapper():
 
     # initalize the pyaudio interface
     p, s = create_pyaudio_interface()
+    frames = []
     print("Recording")
 
     # records the input for 3 seconds
@@ -73,9 +75,19 @@ def read_input(p, s):
     for i in range(0, int(_FS / _CHUNK * _SECONDS)):
             data = s.read(_CHUNK)
             frames.append(data)
+            display_amplitude(data)
     
     # returns frames
     return frames
+
+
+"""
+
+
+
+"""
+def display_amplitude(data):
+    print(audioop.max(data, 2))
 
 
 """
