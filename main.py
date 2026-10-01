@@ -1,5 +1,8 @@
+from clapper_pyaudio import clapper as clap_py
+from clapper_alsaaudio import clapper as clap_alsa
+
 def main():
-    print("main.py")
+    clap_alsa()
 
 
 if __name__ == "__main__":
